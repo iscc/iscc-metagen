@@ -1,0 +1,16 @@
+from litellm import OllamaConfig, completion
+import instructor
+from iscc_metagen.settings import opts
+
+OllamaConfig(
+    num_ctx=opts.ollama_num_ctx,
+    num_gpu=opts.ollama_num_gpu,
+    num_predict=opts.ollama_num_predict,
+    temperature=opts.ollama_temperature,
+    # system=opts.ollama_system,
+)
+
+client = instructor.from_litellm(
+    completion,
+    # mode=opts.instructor_mode
+)

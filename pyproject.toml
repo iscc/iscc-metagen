@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "iscc-metagen"
+version = "0.1.0"
+description = "A library, command-line tool, and web-app for generating structured metadata for digital media assets."
+authors = ["Titusz Pan <titusz.pan@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+instructor = "^1.4.2"
+litellm = "^1.46.1"
+python-dotenv = "^1.0.1"
+pymupdf4llm = "^0.0.16"
+loguru = "^0.7.2"
+openai = "^1.46.0"
+pydantic-extra-types = "^2.9.0"
+pycountry = "^24.6.1"
+ollama = "^0.3.3"
+pydantic-settings = "^2.5.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+
+[tool.black]
+line-length = 120
+preview = true
+enable-unstable-feature = ["string_processing"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
