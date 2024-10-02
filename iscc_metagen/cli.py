@@ -1,9 +1,10 @@
 import cyclopts
 from pathlib import Path
+from litellm.utils import get_valid_models
 from rich import print as rprint
 from rich.json import JSON
 from iscc_metagen.main import generate
-from iscc_metagen.gui import main as gui_main
+
 
 app = cyclopts.App()
 
@@ -37,6 +38,18 @@ def gui():
     gui_file = Path(__file__).parent / "gui.py"
     sys.argv = ["streamlit", "run", str(gui_file)]
     sys.exit(stcli.main())
+
+
+@app.command()
+def models():
+    # type: () -> None
+    """
+    List all LiteLLM supported models.
+    """
+    model_list = get_valid_models()
+    rprint("[bold]Supported LiteLLM Models:[/bold]")
+    for model in model_list:
+        rprint(f"- {model}")
 
 
 if __name__ == "__main__":

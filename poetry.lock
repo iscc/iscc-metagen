@@ -2836,4 +2836,4 @@ gui = ["streamlit"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "986ffe2f6404b6fc6490c118dd0cb004699248d75b8dc4cd2ebbd8245bc6e90b"
+content-hash = "0d0abd1ed48c1508e370a57df586f265ac4b32c753b98d63ff3c339c66f3a95e"

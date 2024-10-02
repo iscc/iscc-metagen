@@ -1,11 +1,10 @@
 from pathlib import Path
 from typing import List
-
 import fitz
 import pymupdf4llm
 from iscc_metagen.schema import PageType, Page
 from iscc_metagen.client import client
-from iscc_metagen.settings import opts
+from iscc_metagen.settings import mg_opts
 from loguru import logger as log
 
 
@@ -21,7 +20,7 @@ def get_page_type(text, pageno=None):
         )
 
     return client.chat.completions.create(
-        model=opts.litellm_model_name,
+        model=mg_opts.litellm_model_name,
         response_model=PageType,
         messages=[
             {

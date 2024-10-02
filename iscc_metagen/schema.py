@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from datetime import date
-from typing import Literal, Optional
-from pydantic import BaseModel, Field, HttpUrl
+from typing import Literal, Optional, Annotated
+from pydantic import BaseModel, Field, HttpUrl, conint, AfterValidator, field_validator
+from pydantic.json_schema import SkipJsonSchema
 from pydantic_extra_types.language_code import LanguageAlpha2
 from pydantic_extra_types.isbn import ISBN
 
@@ -23,19 +23,26 @@ class BookMetadata(BaseModel):
     subtitle: Optional[str] = Field(None, description="The subtitle of the book")
     description: str = Field(..., description="A short and concise description of the book")
     keywords: list[str] = Field(
-        ...,
-        description="Keywords that apply to the books topic",
-        min_items=3,
-        max_items=7,
+        ..., description="Keywords that apply to the books topic", min_length=3, max_length=7
     )
     publisher: Optional[str] = Field(..., description="The name of publisher of the book")
     publisher_website: Optional[HttpUrl] = Field(..., description="Website URL of the publisher")
-    year_published: Optional[date] = Field(..., description="The year of publication")
+    year_published: Optional[conint(ge=1, le=9999)] = Field(
+        ..., description="The year of publication"
+    )
     language: LanguageAlpha2 = Field(
         ..., description="The language of the book (as ISO 639-1 alpha-2)"
     )
     contributors: Optional[list[Contributor]]
     isbns: Optional[list[BookISBN]]
+
+    model: SkipJsonSchema[str] = Field("", description="Model used for generation")
+    response_cost: SkipJsonSchema[float] = Field(0.0, description="Response cost in USC")
+
+    # @field_validator("title")
+    # def title_is_uppercase(cls, v: str):
+    #     assert v.isupper(), "Title must be uppercase"
+    #     return v
 
 
 class PageType(BaseModel):

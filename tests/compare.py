@@ -47,7 +47,7 @@ def compare(text):
         log.debug(f"Testing {full_name} - {params} - {quant}")
         try:
             start_time = time.time()
-            result = generate_metadata(text, full_name)
+            result = generate_metadata(text, model=full_name)
             end_time = time.time()
             execution_time = round(end_time - start_time, 2)
             print(result)
