@@ -91,9 +91,11 @@ def display_metadata(metadata):
         ["Year Published", str(metadata.year_published) if metadata.year_published else "N/A"],
         [
             "Publisher Website",
-            f"<a href='{metadata.publisher_website}'>{metadata.publisher_website}</a>"
-            if metadata.publisher_website
-            else "N/A",
+            (
+                f"<a href='{metadata.publisher_website}'>{metadata.publisher_website}</a>"
+                if metadata.publisher_website
+                else "N/A"
+            ),
         ],
     ]
 
@@ -109,19 +111,23 @@ def display_metadata(metadata):
         )
         table_data.append(["ISBNs", isbns])
 
-    # Create custom HTML table
+    # Create custom HTML table with improved styling
     table_html = """
     <style>
     .custom-table {
         width: 100%;
         border-collapse: collapse;
+        color: var(--text-color);
     }
     .custom-table td {
-        border: 1px solid #ddd;
+        border: 1px solid var(--secondary-background-color);
         padding: 8px;
     }
     .custom-table tr:nth-child(even) {
-        background-color: #f2f2f2;
+        background-color: var(--secondary-background-color);
+    }
+    .custom-table tr:nth-child(odd) {
+        background-color: var(--background-color);
     }
     .custom-table td:first-child {
         font-weight: bold;
