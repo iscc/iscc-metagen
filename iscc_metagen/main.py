@@ -30,7 +30,9 @@ def generate_metadata(text, model=None, max_retries=None):
     )
     model_response: ModelResponse
     metadata.model = model_response["model"]
-    metadata.response_cost = model_response._hidden_params["response_cost"]
+    response_cost = model_response._hidden_params["response_cost"]
+    if response_cost is not None:
+        metadata.response_cost = response_cost
     return metadata
 
 

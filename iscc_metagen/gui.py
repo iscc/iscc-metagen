@@ -6,12 +6,27 @@ from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
 
 
+def format_response_cost(cost):
+    # type: (float) -> str
+    """Format the response cost for display."""
+    return f"${cost:.4f}"
+
+
 st.set_page_config(page_title="MetaGen", layout="wide")
 
 
 def display_metadata(metadata):
     # type: (BookMetadata) -> None
     """Display BookMetadata in a visually appealing manner."""
+    st.markdown(
+        f"""
+        <div style="background-color:#f0f2f6;padding:10px;border-radius:5px;text-align:center;">
+            <h3 style="margin:0;">Response Cost: {format_response_cost(metadata.response_cost)}</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.header(metadata.title, divider=True)
     if metadata.subtitle:
         st.subheader(metadata.subtitle)
@@ -61,32 +76,28 @@ def main():
             tmp_file_path = Path(tmp_file.name)
 
         # Create two columns for cover and metadata
-        col1, col2 = st.columns([1, 2])
+        with st.container():
+            col1, col2 = st.columns([1, 2])
 
-        with col1:
-            # Add a spacer before the image
-            st.markdown("<br>", unsafe_allow_html=True)
+            with col1:
+                # Extract and display cover image
+                with st.spinner("Extracting cover image..."):
+                    cover_image = pdf_extract_cover(tmp_file_path)
+                    if cover_image:
+                        st.image(cover_image, caption="Cover Image", use_column_width=True)
+                    else:
+                        st.warning("Failed to extract cover image.")
 
-            # Extract and display cover image
-            with st.spinner("Extracting cover image..."):
-                cover_image = pdf_extract_cover(tmp_file_path)
-                if cover_image:
-                    st.image(cover_image, caption="Cover Image", use_column_width=True)
-                else:
-                    st.warning("Failed to extract cover image.")
-
-        with col2:
-            # Generate metadata
-            spacer = st.markdown("<br>", unsafe_allow_html=True)
-            with st.spinner("Generating metadata..."):
-                try:
-                    metadata = generate(tmp_file_path)
-                    spacer.empty()
-                    display_metadata(metadata)
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
-                finally:
-                    tmp_file_path.unlink()  # Delete the temporary file
+            with col2:
+                # Generate metadata
+                with st.spinner("Generating metadata..."):
+                    try:
+                        metadata = generate(tmp_file_path)
+                        display_metadata(metadata)
+                    except Exception as e:
+                        st.error(f"An error occurred: {str(e)}")
+                    finally:
+                        tmp_file_path.unlink()  # Delete the temporary file
 
 
 if __name__ == "__main__":
