@@ -6,7 +6,7 @@
 - Keep the number of function arguments below 4!
 - Don´t use nested functions!
 - Write concise and to-the-point docstrings for all functions!
-- Use type comments style (PEP 484) instead of function annotations!
+- Write type comments style (PEP 484) instead of function annotations (PEP 3107)
 - Always add a correct PEP 484 style type comment as the first line after the function definition!
 - Use built-in collection types as generic types for annotations (PEP 585)!
 - Use the | (pipe) operator for writing union types (PEP 604)!

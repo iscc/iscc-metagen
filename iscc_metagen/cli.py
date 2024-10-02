@@ -3,6 +3,7 @@ from pathlib import Path
 from rich import print as rprint
 from rich.json import JSON
 from iscc_metagen.main import generate
+from iscc_metagen.gui import main as gui_main
 
 app = cyclopts.App()
 
@@ -21,6 +22,21 @@ def main(file_path):
         rprint(JSON(json_output))
     except Exception as e:
         rprint(f"[bold red]Error:[/bold red] {str(e)}")
+
+
+@app.command()
+def gui():
+    # type: () -> None
+    """
+    Start the Streamlit GUI for the metadata generator.
+    """
+    import streamlit.web.cli as stcli
+    import sys
+    from pathlib import Path
+
+    gui_file = Path(__file__).parent / "gui.py"
+    sys.argv = ["streamlit", "run", str(gui_file)]
+    sys.exit(stcli.main())
 
 
 if __name__ == "__main__":

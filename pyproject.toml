@@ -5,9 +5,6 @@ description = "A library, command-line tool, and web-app for generating structur
 authors = ["Titusz Pan <titusz.pan@gmail.com>"]
 readme = "README.md"
 
-[tool.poetry.scripts]
-metagen = 'iscc_metagen.cli:app'
-
 [tool.poetry.dependencies]
 python = "^3.11"
 instructor = "^1.4.2"
@@ -26,6 +23,8 @@ streamlit = { version = "^1.39.0", optional = true }
 [tool.poetry.extras]
 gui = ["streamlit"]
 
+[tool.poetry.scripts]
+metagen = 'iscc_metagen.cli:app'
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
