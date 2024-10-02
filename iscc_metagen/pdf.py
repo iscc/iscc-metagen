@@ -3,6 +3,7 @@ import pymupdf4llm
 from loguru import logger as log
 from pathlib import Path
 from pymupdf import Document
+import io
 
 
 def pdf_open(doc):
@@ -38,6 +39,25 @@ def pdf_extract_pages(doc, first=8, middle=0, last=3):
         page_chunks=False,
         show_progress=False,
     )
+
+
+def pdf_extract_cover(doc):
+    # type: (str|Path|Document) -> io.BytesIO|None
+    """
+    Extract the first page of a PDF as a cover image.
+
+    :param doc: File path as string or Path, or an open Document object
+    :return: An in-memory image object (BytesIO) or None if extraction fails
+    """
+    doc = pdf_open(doc)
+    try:
+        first_page = doc[0]
+        pix = first_page.get_pixmap(matrix=pymupdf.Matrix(2, 2))  # Scale up for better quality
+        img_bytes = pix.tobytes("png")
+        return io.BytesIO(img_bytes)
+    except Exception as e:
+        log.error(f"Failed to extract cover image: {e}")
+        return None
 
 
 if __name__ == "__main__":

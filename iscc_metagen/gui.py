@@ -3,6 +3,7 @@ from pathlib import Path
 import tempfile
 from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
+from iscc_metagen.pdf import pdf_extract_cover
 
 
 def display_metadata(metadata):
@@ -43,6 +44,7 @@ def display_metadata(metadata):
         json_output = metadata.model_dump_json(indent=2)
         st.code(json_output, language="json")
 
+
 def main():
     # type: () -> None
     st.set_page_config(page_title="MetaGen", layout="wide")
@@ -56,6 +58,15 @@ def main():
             tmp_file.write(uploaded_file.getvalue())
             tmp_file_path = Path(tmp_file.name)
 
+        # Extract and display cover image
+        with st.spinner("Extracting cover image..."):
+            cover_image = pdf_extract_cover(tmp_file_path)
+            if cover_image:
+                st.image(cover_image, caption="Cover Image", use_column_width=True)
+            else:
+                st.warning("Failed to extract cover image.")
+
+        # Generate metadata
         with st.spinner("Extracting metadata..."):
             try:
                 metadata = generate(tmp_file_path)
