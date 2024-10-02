@@ -84,27 +84,33 @@ def display_metadata(metadata):
 
     st.markdown(keywords_html, unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"**Publisher:** {metadata.publisher or 'N/A'}")
-        st.markdown(f"**Language:** {metadata.language}")
-    with col2:
-        st.markdown(f"**Year Published:** {metadata.year_published or 'N/A'}")
-        if metadata.publisher_website:
-            st.markdown(
-                "**Publisher Website:**"
-                f" [{metadata.publisher_website}]({metadata.publisher_website})"
-            )
+    # Create a table for the remaining metadata
+    table_data = [
+        ["Publisher", metadata.publisher or "N/A"],
+        ["Language", metadata.language],
+        ["Year Published", str(metadata.year_published) if metadata.year_published else "N/A"],
+        [
+            "Publisher Website",
+            f"[{metadata.publisher_website}]({metadata.publisher_website})"
+            if metadata.publisher_website
+            else "N/A",
+        ],
+    ]
 
+    # Add contributors to the table
     if metadata.contributors:
-        st.markdown("**Contributors:**")
-        for contributor in metadata.contributors:
-            st.markdown(f"- {contributor.name} ({contributor.role})")
+        contributors = ", ".join([f"{c.name} ({c.role})" for c in metadata.contributors])
+        table_data.append(["Contributors", contributors])
 
+    # Add ISBNs to the table
     if metadata.isbns:
-        st.markdown("**ISBNs:**")
-        for isbn in metadata.isbns:
-            st.markdown(f"- {isbn.isbn} (Edition: {isbn.edition or 'N/A'})")
+        isbns = ", ".join(
+            [f"{isbn.isbn} (Edition: {isbn.edition or 'N/A'})" for isbn in metadata.isbns]
+        )
+        table_data.append(["ISBNs", isbns])
+
+    # Display the table
+    st.table(table_data)
 
     # Add collapsible JSON area
     with st.expander("View JSON"):
