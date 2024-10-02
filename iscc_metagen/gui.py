@@ -1,6 +1,9 @@
 import streamlit as st
 from pathlib import Path
 import tempfile
+
+from streamlit import divider
+
 from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
@@ -9,27 +12,27 @@ from iscc_metagen.pdf import pdf_extract_cover
 st.set_page_config(page_title="MetaGen", layout="wide")
 
 # Add custom CSS for mobile responsiveness
-st.markdown(
-    """
-<style>
-@media (max-width: 600px) {
-    .stHorizontalBlock {
-        flex-wrap: wrap;
-    }
-    .stHorizontalBlock > div {
-        width: 100% !important;
-    }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
+# st.markdown(
+#     """
+# <style>
+# @media (max-width: 600px) {
+#     .stHorizontalBlock {
+#         flex-wrap: wrap;
+#     }
+#     .stHorizontalBlock > div {
+#         width: 100% !important;
+#     }
+# }
+# </style>
+# """,
+#     unsafe_allow_html=True,
+# )
 
 
 def display_metadata(metadata):
     # type: (BookMetadata) -> None
     """Display BookMetadata in a visually appealing manner."""
-    st.header(metadata.title)
+    st.header(metadata.title, divider=True)
     if metadata.subtitle:
         st.subheader(metadata.subtitle)
 
@@ -81,6 +84,9 @@ def main():
         col1, col2 = st.columns([1, 2])
 
         with col1:
+            # Add a spacer before the image
+            st.markdown("<br>", unsafe_allow_html=True)
+
             # Extract and display cover image
             with st.spinner("Extracting cover image..."):
                 cover_image = pdf_extract_cover(tmp_file_path)
@@ -91,9 +97,11 @@ def main():
 
         with col2:
             # Generate metadata
+            spacer = st.markdown("<br>", unsafe_allow_html=True)
             with st.spinner("Generating metadata..."):
                 try:
                     metadata = generate(tmp_file_path)
+                    spacer.empty()
                     display_metadata(metadata)
                 except Exception as e:
                     st.error(f"An error occurred: {str(e)}")
