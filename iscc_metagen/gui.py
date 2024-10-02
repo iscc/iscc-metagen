@@ -12,7 +12,21 @@ def format_response_cost(cost):
     return f"${cost:.4f}"
 
 
-st.set_page_config(page_title="MetaGen", layout="wide")
+def set_page_container_style():
+    # type: () -> None
+    """Set max-width of the content area."""
+    st.markdown(
+        """
+        <style>
+        .block-container {
+            max-width: 1280px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def display_metadata(metadata):
@@ -65,6 +79,9 @@ def display_metadata(metadata):
 
 def main():
     # type: () -> None
+    st.set_page_config(page_title="MetaGen", layout="wide")
+    set_page_container_style()  # Add this line to set the max-width
+
     st.title("MetaGen - Metadata Generator")
     st.subheader("Generative Structured Digital Content Metadata Recognition and Extraction")
 
