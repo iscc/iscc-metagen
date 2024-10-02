@@ -5,6 +5,26 @@ from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
 
+# Set page config as the first Streamlit command
+st.set_page_config(page_title="MetaGen", layout="wide")
+
+# Add custom CSS for mobile responsiveness
+st.markdown(
+    """
+<style>
+@media (max-width: 600px) {
+    .stHorizontalBlock {
+        flex-wrap: wrap;
+    }
+    .stHorizontalBlock > div {
+        width: 100% !important;
+    }
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
 
 def display_metadata(metadata):
     # type: (BookMetadata) -> None
@@ -47,7 +67,6 @@ def display_metadata(metadata):
 
 def main():
     # type: () -> None
-    st.set_page_config(page_title="MetaGen", layout="wide")
     st.title("MetaGen")
     st.subheader("Book Metadata Generator")
 
@@ -58,23 +77,28 @@ def main():
             tmp_file.write(uploaded_file.getvalue())
             tmp_file_path = Path(tmp_file.name)
 
-        # Extract and display cover image
-        with st.spinner("Extracting cover image..."):
-            cover_image = pdf_extract_cover(tmp_file_path)
-            if cover_image:
-                st.image(cover_image, caption="Cover Image", use_column_width=True)
-            else:
-                st.warning("Failed to extract cover image.")
+        # Create two columns for cover and metadata
+        col1, col2 = st.columns([1, 2])
 
-        # Generate metadata
-        with st.spinner("Extracting metadata..."):
-            try:
-                metadata = generate(tmp_file_path)
-                display_metadata(metadata)
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-            finally:
-                tmp_file_path.unlink()  # Delete the temporary file
+        with col1:
+            # Extract and display cover image
+            with st.spinner("Extracting cover image..."):
+                cover_image = pdf_extract_cover(tmp_file_path)
+                if cover_image:
+                    st.image(cover_image, caption="Cover Image", use_column_width=True)
+                else:
+                    st.warning("Failed to extract cover image.")
+
+        with col2:
+            # Generate metadata
+            with st.spinner("Extracting metadata..."):
+                try:
+                    metadata = generate(tmp_file_path)
+                    display_metadata(metadata)
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+                finally:
+                    tmp_file_path.unlink()  # Delete the temporary file
 
 
 if __name__ == "__main__":
