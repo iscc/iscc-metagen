@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit_theme import st_theme
 from pathlib import Path
 import tempfile
 from iscc_metagen.main import generate
