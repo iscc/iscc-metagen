@@ -1,32 +1,12 @@
 import streamlit as st
 from pathlib import Path
 import tempfile
-
-from streamlit import divider
-
 from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
 
-# Set page config as the first Streamlit command
-st.set_page_config(page_title="MetaGen", layout="wide")
 
-# Add custom CSS for mobile responsiveness
-# st.markdown(
-#     """
-# <style>
-# @media (max-width: 600px) {
-#     .stHorizontalBlock {
-#         flex-wrap: wrap;
-#     }
-#     .stHorizontalBlock > div {
-#         width: 100% !important;
-#     }
-# }
-# </style>
-# """,
-#     unsafe_allow_html=True,
-# )
+st.set_page_config(page_title="MetaGen", layout="wide")
 
 
 def display_metadata(metadata):

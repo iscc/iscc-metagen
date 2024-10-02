@@ -2,3 +2,5 @@
 .env
 .aider*
 .data
+__pycache__
+
