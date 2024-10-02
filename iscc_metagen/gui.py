@@ -38,12 +38,16 @@ def display_metadata(metadata):
         st.markdown("**ISBNs:**")
         for isbn in metadata.isbns:
             st.markdown(f"- {isbn.isbn} (Edition: {isbn.edition or 'N/A'})")
-
+    # Add collapsible JSON area
+    with st.expander("View JSON"):
+        json_output = metadata.model_dump_json(indent=2)
+        st.code(json_output, language="json")
 
 def main():
     # type: () -> None
-    st.set_page_config(page_title="ISCC MetaGen", layout="centered")
-    st.title("ISCC MetaGen - Book Metadata Extractor")
+    st.set_page_config(page_title="MetaGen", layout="wide")
+    st.title("MetaGen")
+    st.subheader("Book Metadata Generator")
 
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
