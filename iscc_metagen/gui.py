@@ -67,8 +67,8 @@ def display_metadata(metadata):
 
 def main():
     # type: () -> None
-    st.title("MetaGen")
-    st.subheader("Book Metadata Generator")
+    st.title("MetaGen - Metadata Generator")
+    st.subheader("Generative Structured Digital Content Metadata Recognition and Extraction")
 
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
@@ -91,7 +91,7 @@ def main():
 
         with col2:
             # Generate metadata
-            with st.spinner("Extracting metadata..."):
+            with st.spinner("Generating metadata..."):
                 try:
                     metadata = generate(tmp_file_path)
                     display_metadata(metadata)
