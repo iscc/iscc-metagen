@@ -64,12 +64,12 @@ def display_metadata(metadata):
 
     st.markdown(f"**Description:** {metadata.description}")
 
-    st.markdown("**Keywords:**")
     keywords_html = """
     <style>
     .keyword-pill {
         display: inline-block;
-        background-color: #e9ecef;
+        color: white;
+        background-color: #ff4b4b;
         border-radius: 16px;
         padding: 4px 10px;
         margin: 4px;
@@ -133,7 +133,7 @@ def display_metadata(metadata):
     for row in table_data:
         table_html += f"<tr><td>{row[0]}</td><td>{row[1]}</td></tr>"
     table_html += "</table>"
-
+    st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(table_html, unsafe_allow_html=True)
 
     # Add collapsible JSON area
