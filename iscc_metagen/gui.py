@@ -64,8 +64,14 @@ def display_metadata(metadata):
 
     st.markdown(f"**Description:** {metadata.description}")
 
-    st.markdown("**Keywords:**")
-    st.write(", ".join(metadata.keywords))
+    st.multiselect(
+        "Keywords",
+        options=metadata.keywords,
+        default=metadata.keywords,
+        key="keywords_multiselect",
+        label_visibility="hidden",
+        disabled=False,
+    )
 
     col1, col2 = st.columns(2)
     with col1:
@@ -88,6 +94,7 @@ def display_metadata(metadata):
         st.markdown("**ISBNs:**")
         for isbn in metadata.isbns:
             st.markdown(f"- {isbn.isbn} (Edition: {isbn.edition or 'N/A'})")
+
     # Add collapsible JSON area
     with st.expander("View JSON"):
         json_output = metadata.model_dump_json(indent=2)
