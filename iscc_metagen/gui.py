@@ -64,14 +64,25 @@ def display_metadata(metadata):
 
     st.markdown(f"**Description:** {metadata.description}")
 
-    st.multiselect(
-        "Keywords",
-        options=metadata.keywords,
-        default=metadata.keywords,
-        key="keywords_multiselect",
-        label_visibility="hidden",
-        disabled=False,
-    )
+    st.markdown("**Keywords:**")
+    keywords_html = """
+    <style>
+    .keyword-pill {
+        display: inline-block;
+        background-color: #e9ecef;
+        border-radius: 16px;
+        padding: 4px 10px;
+        margin: 4px;
+        font-size: 14px;
+    }
+    </style>
+    <div>
+    """
+    for keyword in metadata.keywords:
+        keywords_html += f'<span class="keyword-pill">{keyword}</span>'
+    keywords_html += "</div>"
+
+    st.markdown(keywords_html, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
