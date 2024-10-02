@@ -13,14 +13,11 @@ def create_sidebar():
     with st.sidebar:
         st.header("Settings")
         default_model = mg_opts.litellm_model_name
+        model_options = mg_opts.litellm_models
         model = st.selectbox(
             "Choose a model for generation",
-            options=["gpt-3.5-turbo", "gpt-4"],
-            index=(
-                ["gpt-3.5-turbo", "gpt-4"].index(default_model)
-                if default_model in ["gpt-3.5-turbo", "gpt-4"]
-                else 0
-            ),
+            options=model_options,
+            index=model_options.index(default_model) if default_model in model_options else 0,
             help="Select the AI model to use for metadata generation.",
         )
     return model
