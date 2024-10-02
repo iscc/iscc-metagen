@@ -12,7 +12,9 @@ class Contributor(BaseModel):
 
 
 class BookISBN(BaseModel):
-    isbn: ISBN = Field(..., description="The ISBN number (Only the number without prefix or dashes)")
+    isbn: ISBN = Field(
+        ..., description="The ISBN number (Only the number without prefix or dashes)"
+    )
     edition: Optional[str] = Field(None, description="The book edition to which the ISBN belongs")
 
 
@@ -29,7 +31,9 @@ class BookMetadata(BaseModel):
     publisher: Optional[str] = Field(..., description="The name of publisher of the book")
     publisher_website: Optional[HttpUrl] = Field(..., description="Website URL of the publisher")
     year_published: Optional[date] = Field(..., description="The year of publication")
-    language: LanguageAlpha2 = Field(..., description="The language of the book (as ISO 639-1 alpha-2)")
+    language: LanguageAlpha2 = Field(
+        ..., description="The language of the book (as ISO 639-1 alpha-2)"
+    )
     contributors: Optional[list[Contributor]]
     isbns: Optional[list[BookISBN]]
 
@@ -40,14 +44,18 @@ class PageType(BaseModel):
     For example, it is quite unlikely that page 0 is an IMPRINT.
     """
 
-    chain_of_thought: str = Field(..., description="The chain of thought that led to the prediction.")
+    chain_of_thought: str = Field(
+        ..., description="The chain of thought that led to the prediction."
+    )
     page_type: Literal[
         "TITLE_PAGE",
         "IMPRINT",
         "TABLE_OF_CONTENTS",
         "OTHER",
     ] = Field(..., description="The predicted page type.")
-    # confidence: Literal["LOW", "MEDIUM", "HIGH"] = Field(..., description="The confidence score of your prediction.")
+    confidence: Literal["LOW", "MEDIUM", "HIGH"] = Field(
+        ..., description="The confidence score of your prediction."
+    )
     page_number: int = Field(..., description="The page number")
 
 

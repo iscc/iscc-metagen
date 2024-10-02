@@ -9,18 +9,20 @@ from iscc_metagen.settings import opts
 from loguru import logger as log
 
 
-def get_page_type(text, pageno=None, temperature=opts.ollama_temperature):
-    # type: (str, int|None, str) -> PageType
+def get_page_type(text, pageno=None):
+    # type: (str, int|None) -> PageType
     """Perform  single-label page-type classification"""
     if pageno is None:
         prompt = f"Classify the following page:\n\n<page_text>{text}</page_text>"
     else:
-        prompt = f"Classify the following page:\n\n<page_number>{pageno}</page_number>\n<page_text>{text}</page_text>"
+        prompt = (
+            "Classify the following"
+            f" page:\n\n<page_number>{pageno}</page_number>\n<page_text>{text}</page_text>"
+        )
 
     return client.chat.completions.create(
         model=opts.litellm_model_name,
         response_model=PageType,
-        temperature=temperature,
         messages=[
             {
                 "role": "user",
@@ -52,7 +54,10 @@ def collect_relevant_pages(path, min_chars=5, max_front=20, max_back=10):
                 log.error(e)
                 continue
             if len(content) < min_chars:
-                log.debug(f"{path.name} - Skip page {page_number} - less than {min_chars} chars -> {content[:10]}")
+                log.debug(
+                    f"{path.name} - Skip page {page_number} - less than {min_chars} chars ->"
+                    f" {content[:10]}"
+                )
                 continue
             try:
                 log.debug(f"{path.name} - Classifying page {page_number}")
@@ -81,7 +86,10 @@ def collect_relevant_pages(path, min_chars=5, max_front=20, max_back=10):
                 log.error(e)
                 continue
             if len(content) < min_chars:
-                log.debug(f"{path.name} - Skip page {page_number} - less than {min_chars} chars -> {content[:10]}")
+                log.debug(
+                    f"{path.name} - Skip page {page_number} - less than {min_chars} chars ->"
+                    f" {content[:10]}"
+                )
                 continue
             try:
                 page_type = get_page_type(content, pageno=page_number)

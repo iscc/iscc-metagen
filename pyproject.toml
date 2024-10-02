@@ -21,9 +21,10 @@ pydantic-settings = "^2.5.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
+mdformat = "^0.7.17"
 
 [tool.black]
-line-length = 120
+line-length = 100
 preview = true
 enable-unstable-feature = ["string_processing"]
 
