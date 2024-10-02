@@ -17,6 +17,13 @@ pydantic-extra-types = "^2.9.0"
 pycountry = "^24.6.1"
 ollama = "^0.3.3"
 pydantic-settings = "^2.5.2"
+cyclopts = { version = "^2.9.9", optional = true }
+streamlit = { version = "^1.39.0", optional = true }
+
+
+[tool.poetry.extras]
+cli = ["cyclopts"]
+gui = ["streamlit"]
 
 
 [tool.poetry.group.dev.dependencies]
