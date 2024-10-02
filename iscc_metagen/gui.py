@@ -4,6 +4,26 @@ import tempfile
 from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
+from iscc_metagen.settings import mg_opts
+
+
+def create_sidebar():
+    # type: () -> str
+    """Create a sidebar with model selection."""
+    with st.sidebar:
+        st.header("Settings")
+        default_model = mg_opts.litellm_model_name
+        model = st.selectbox(
+            "Choose a model for generation",
+            options=["gpt-3.5-turbo", "gpt-4"],
+            index=(
+                ["gpt-3.5-turbo", "gpt-4"].index(default_model)
+                if default_model in ["gpt-3.5-turbo", "gpt-4"]
+                else 0
+            ),
+            help="Select the AI model to use for metadata generation.",
+        )
+    return model
 
 
 def format_response_cost(cost):
@@ -80,7 +100,10 @@ def display_metadata(metadata):
 def main():
     # type: () -> None
     st.set_page_config(page_title="MetaGen", layout="wide")
-    set_page_container_style()  # Add this line to set the max-width
+    set_page_container_style()
+
+    # Add the sidebar and get the selected model
+    selected_model = create_sidebar()
 
     st.title("MetaGen - Metadata Generator")
     st.subheader("Generative Structured Digital Content Metadata Recognition and Extraction")
@@ -109,7 +132,8 @@ def main():
                 # Generate metadata
                 with st.spinner("Generating metadata..."):
                     try:
-                        metadata = generate(tmp_file_path)
+                        # Pass the selected model to the generate function
+                        metadata = generate(tmp_file_path, model=selected_model)
                         display_metadata(metadata)
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")

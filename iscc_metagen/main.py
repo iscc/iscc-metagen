@@ -8,13 +8,28 @@ from iscc_metagen.pdf import pdf_extract_pages
 
 def generate(file, model=None, max_retries=None):
     # type: (str, str|None, int|None) -> BookMetadata
+    """
+    Generate metadata from a PDF file.
+
+    :param file: Path to the PDF file.
+    :param model: AI model to use for generation.
+    :param max_retries: Maximum number of retries for API calls.
+    :return: Generated book metadata.
+    """
     text = pdf_extract_pages(file)
     return generate_metadata(text, model, max_retries)
 
 
 def generate_metadata(text, model=None, max_retries=None):
     # type: (str, str|None, int|None) -> BookMetadata
-    """Generate metadata from text input"""
+    """
+    Generate metadata from text input.
+
+    :param text: Extracted text from PDF.
+    :param model: AI model to use for generation.
+    :param max_retries: Maximum number of retries for API calls.
+    :return: Generated book metadata.
+    """
     model = model or mg_opts.litellm_model_name
     max_retries = max_retries or mg_opts.max_retries
     metadata, model_response = client.chat.completions.create_with_completion(
