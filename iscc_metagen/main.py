@@ -6,10 +6,10 @@ from iscc_metagen.settings import mg_opts
 from iscc_metagen.pdf import pdf_extract_pages
 
 
-def generate(file):
-    # type: (str|Path) -> BookMetadata
+def generate(file, model=None, max_retries=None):
+    # type: (str, str|None, int|None) -> BookMetadata
     text = pdf_extract_pages(file)
-    return generate_metadata(text)
+    return generate_metadata(text, model, max_retries)
 
 
 def generate_metadata(text, model=None, max_retries=None):
