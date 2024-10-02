@@ -5,6 +5,7 @@ from pathlib import Path
 from pymupdf import Document
 import io
 from PIL import Image
+from iscc_metagen.settings import mg_opts
 
 
 def pdf_open(doc):
@@ -23,16 +24,30 @@ def pdf_open(doc):
     return doc
 
 
-def pdf_extract_pages(doc, first=8, middle=0, last=3):
-    # type: (str|Path|Document, int, int, int) -> str
-    """Extract relevant pages as a single Markdown text"""
+def pdf_extract_pages(doc, first=None, middle=None, last=None):
+    # type: (str|Path|Document, int|None, int|None, int|None) -> str
+    """
+    Extract relevant pages as a single Markdown text
+
+    :param doc: PDF document to extract pages from
+    :param first: Number of pages to extract from the front (overrides settings if provided)
+    :param middle: Number of pages to extract from the middle (overrides settings if provided)
+    :param last: Number of pages to extract from the back (overrides settings if provided)
+    :return: Extracted pages as Markdown text
+    """
     doc = pdf_open(doc)
     log.debug(f"{doc.name} -> {doc.page_count}")
-    first = list(range(first)) if first else []
+
+    first = first if first is not None else mg_opts.front_pages
+    middle = middle if middle is not None else mg_opts.mid_pages
+    last = last if last is not None else mg_opts.back_pages
+
+    first_pages = list(range(first)) if first else []
     center = doc.page_count // 2
-    middle = list(range(center, center + middle)) if middle else []
-    last = list(range(doc.page_count - last, doc.page_count)) if last else []
-    page_numbers = first + middle + last
+    middle_pages = list(range(center, center + middle)) if middle else []
+    last_pages = list(range(doc.page_count - last, doc.page_count)) if last else []
+    page_numbers = first_pages + middle_pages + last_pages
+
     return pymupdf4llm.to_markdown(
         doc,
         pages=page_numbers,

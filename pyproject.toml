@@ -28,13 +28,21 @@ gui = ["streamlit"]
 metagen = 'iscc_metagen.cli:app'
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.8.0"
-mdformat = "^0.7.17"
+black = "*"
+ruff = "*"
+mdformat = "*"
+
 
 [tool.black]
 line-length = 100
 preview = true
 enable-unstable-feature = ["string_processing"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+line-ending = "lf"
 
 [build-system]
 requires = ["poetry-core"]

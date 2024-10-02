@@ -7,7 +7,7 @@ from iscc_metagen.pdf import pdf_extract_pages
 
 
 def generate(file, model=None, max_retries=None):
-    # type: (str, str|None, int|None) -> BookMetadata
+    # type: (str|Path, str|None, int|None) -> BookMetadata
     """
     Generate metadata from a PDF file.
 

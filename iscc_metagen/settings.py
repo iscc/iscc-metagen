@@ -4,7 +4,6 @@ from instructor.mode import Mode
 
 
 class MetaGenSettings(BaseSettings):
-
     litellm_model_name: str = Field(
         "ollama/qwen2.5:7b-instruct-q8_0", description="Default Litellm model used for inference"
     )
@@ -15,6 +14,15 @@ class MetaGenSettings(BaseSettings):
     max_retries: int = Field(3, description="Max retries to generate a valid response")
     ollama_num_ctx: int = Field(8192, description="Default context size for loading Ollama models")
     ollama_num_gpu: int = Field(100, description="The number of layers to send to the GPU(s).")
+    front_pages: int = Field(
+        8, description="Number of pages to extract from the front of the document"
+    )
+    mid_pages: int = Field(
+        0, description="Number of pages to extract from the middle of the document"
+    )
+    back_pages: int = Field(
+        3, description="Number of pages to extract from the back of the document"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
