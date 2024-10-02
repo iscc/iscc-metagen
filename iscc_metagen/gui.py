@@ -91,7 +91,7 @@ def display_metadata(metadata):
         ["Year Published", str(metadata.year_published) if metadata.year_published else "N/A"],
         [
             "Publisher Website",
-            f"[{metadata.publisher_website}]({metadata.publisher_website})"
+            f"<a href='{metadata.publisher_website}'>{metadata.publisher_website}</a>"
             if metadata.publisher_website
             else "N/A",
         ],
@@ -109,8 +109,32 @@ def display_metadata(metadata):
         )
         table_data.append(["ISBNs", isbns])
 
-    # Display the table
-    st.table(table_data)
+    # Create custom HTML table
+    table_html = """
+    <style>
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .custom-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .custom-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .custom-table td:first-child {
+        font-weight: bold;
+        width: 30%;
+    }
+    </style>
+    <table class="custom-table">
+    """
+    for row in table_data:
+        table_html += f"<tr><td>{row[0]}</td><td>{row[1]}</td></tr>"
+    table_html += "</table>"
+
+    st.markdown(table_html, unsafe_allow_html=True)
 
     # Add collapsible JSON area
     with st.expander("View JSON"):
