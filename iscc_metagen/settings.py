@@ -6,7 +6,10 @@ from instructor.mode import Mode
 class MetaGenSettings(BaseSettings):
 
     litellm_model_name: str = Field(
-        "ollama/qwen2.5:7b-instruct-q8_0", description="Litellm model name"
+        "ollama/qwen2.5:7b-instruct-q8_0", description="Default Litellm model used for inference"
+    )
+    litellm_models: list[str] = Field(
+        [litellm_model_name], description="List of available litellm models"
     )
     instructor_mode: Mode = Field(Mode.TOOLS, description="Instructor tool calling mode")
     max_retries: int = Field(3, description="Max retries to generate a valid response")
