@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_theme import st_theme
 from pathlib import Path
 import tempfile
 from iscc_metagen.main import generate
@@ -49,10 +50,11 @@ def set_page_container_style():
 def display_metadata(metadata):
     # type: (BookMetadata) -> None
     """Display BookMetadata in a visually appealing manner."""
+
     st.markdown(
         f"""
-        <div style="background-color:#f0f2f6;padding:10px;border-radius:5px;text-align:center;">
-            <h3 style="margin:0;">Response Cost: {format_response_cost(metadata.response_cost)}</h3>
+        <div style="background-color: #ff4b4b;padding:10px;border-radius:5px;text-align:center;">
+            <h3 style="margin:0;color:white;">Response Cost: {format_response_cost(metadata.response_cost)}</h3>
         </div>
         """,
         unsafe_allow_html=True,
