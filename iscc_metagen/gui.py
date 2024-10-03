@@ -174,40 +174,63 @@ def main():
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
     if uploaded_file is not None:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            tmp_file_path = Path(tmp_file.name)
+        # Create status container
+        status = st.status("Processing...", expanded=True)
 
-        with st.container():
-            col1, col2 = st.columns([1, 2])
+        # Create log placeholder inside the status container
+        streamlit_log_placeholder = status.empty()
 
-            with col1:
-                with st.spinner("Extracting cover image..."):
-                    cover_image = pdf_extract_cover(tmp_file_path)
-                    if cover_image:
-                        st.image(cover_image, caption="Cover Image", use_column_width=True)
-                    else:
-                        st.warning("Failed to extract cover image.")
+        # Create two columns for cover image and metadata
+        col1, col2 = st.columns([1, 2])
 
-            with col2:
-                streamlit_log_placeholder = st.empty()
+        # Create placeholders for cover image and metadata
+        with col1:
+            cover_image_placeholder = st.empty()
+        with col2:
+            metadata_placeholder = st.empty()
 
-                # Add the Streamlit sink to loguru
-                sink_id = logger.add(streamlit_sink, format="{message}")
+        # Add the Streamlit sink to loguru
+        sink_id = logger.add(streamlit_sink, format="{message}")
 
-                with st.status("Generating metadata...", expanded=True) as status:
-                    try:
-                        metadata = generate(tmp_file_path, model=selected_model)
-                        status.update(label="Metadata generated successfully!", state="complete")
-                        display_metadata(metadata)
-                    except Exception as e:
-                        status.update(label="An error occurred", state="error")
-                        st.error(f"An error occurred: {str(e)}")
-                    finally:
-                        tmp_file_path.unlink()
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                tmp_file.write(uploaded_file.getvalue())
+                tmp_file_path = Path(tmp_file.name)
 
-                # Remove the Streamlit sink after generation is complete
-                logger.remove(sink_id)
+            logger.info("PDF file uploaded successfully.")
+            status.update(label="Extracting cover image...", state="running")
+
+            # Extract cover image
+            cover_image = pdf_extract_cover(tmp_file_path)
+
+            # Display cover image immediately if available
+            if cover_image:
+                with cover_image_placeholder.container():
+                    st.image(cover_image, caption="Cover Image", use_column_width=True)
+            else:
+                with cover_image_placeholder.container():
+                    st.warning("Failed to extract cover image.")
+
+            status.update(label="Generating metadata...", state="running")
+            # Generate metadata
+            metadata = generate(tmp_file_path, model=selected_model)
+
+            logger.info("Metadata generation completed successfully.")
+            status.update(label="Processing completed!", state="complete")
+
+            # Display metadata
+            with metadata_placeholder.container():
+                display_metadata(metadata)
+
+        except Exception as e:
+            status.update(label="An error occurred", state="error")
+            st.error(f"An error occurred: {str(e)}")
+            logger.exception("An error occurred during processing")
+        finally:
+            # Remove the Streamlit sink after processing is complete
+            logger.remove(sink_id)
+            if "tmp_file_path" in locals():
+                tmp_file_path.unlink()
 
 
 if __name__ == "__main__":

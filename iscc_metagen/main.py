@@ -4,6 +4,7 @@ from iscc_metagen.schema import BookMetadata
 from iscc_metagen.client import client
 from iscc_metagen.settings import mg_opts
 from iscc_metagen.pdf import pdf_extract_pages
+from loguru import logger
 
 
 def generate(file, model=None, max_retries=None):
@@ -16,8 +17,12 @@ def generate(file, model=None, max_retries=None):
     :param max_retries: Maximum number of retries for API calls.
     :return: Generated book metadata.
     """
+    logger.info(f"Starting metadata generation for {file}")
     text = pdf_extract_pages(file)
-    return generate_metadata(text, model, max_retries)
+    logger.info("Text extraction completed, generating metadata")
+    metadata = generate_metadata(text, model, max_retries)
+    logger.info("Metadata generation completed")
+    return metadata
 
 
 def generate_metadata(text, model=None, max_retries=None):
