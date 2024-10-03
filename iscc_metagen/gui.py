@@ -14,7 +14,9 @@ streamlit_log_placeholder = None
 def streamlit_sink(message):
     global streamlit_log_placeholder
     if streamlit_log_placeholder is not None:
-        streamlit_log_placeholder.markdown(f"{message.record['message']}")
+        msg = f"{message.record['message']}"
+        streamlit_log_placeholder.write(msg)
+        streamlit_log_placeholder.update(label=msg)
 
 
 def create_sidebar():
@@ -175,10 +177,10 @@ def main():
 
     if uploaded_file is not None:
         # Create status container
-        status = st.status("Processing...", expanded=True)
+        status = st.status("Processing...", expanded=False)
 
         # Create log placeholder inside the status container
-        streamlit_log_placeholder = status.empty()
+        streamlit_log_placeholder = status
 
         # Create two columns for cover image and metadata
         col1, col2 = st.columns([1, 2])
@@ -197,13 +199,8 @@ def main():
                 tmp_file.write(uploaded_file.getvalue())
                 tmp_file_path = Path(tmp_file.name)
 
-            logger.info("PDF file uploaded successfully.")
-            status.update(label="Extracting cover image...", state="running")
-
-            # Extract cover image
             cover_image = pdf_extract_cover(tmp_file_path)
 
-            # Display cover image immediately if available
             if cover_image:
                 with cover_image_placeholder.container():
                     st.image(cover_image, caption="Cover Image", use_column_width=True)
@@ -211,12 +208,9 @@ def main():
                 with cover_image_placeholder.container():
                     st.warning("Failed to extract cover image.")
 
-            status.update(label="Generating metadata...", state="running")
-            # Generate metadata
             metadata = generate(tmp_file_path, model=selected_model)
 
-            logger.info("Metadata generation completed successfully.")
-            status.update(label="Processing completed!", state="complete")
+            status.update(label="Processing completed!", state="complete", expanded=False)
 
             # Display metadata
             with metadata_placeholder.container():

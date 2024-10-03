@@ -20,9 +20,9 @@ def pdf_open(doc):
     if isinstance(doc, (str, Path)):
         doc = Path(doc)
         filename = doc.name
-        log.info(f"{doc.name} -> open with PDF processor")
         doc = pymupdf.open(doc)
         doc.filename = filename
+        log.info("Opened file with PDF processor")
     elif not isinstance(doc, Document):
         raise TypeError("Input must be a string, Path, or Document object")
     return doc
@@ -44,7 +44,7 @@ def pdf_extract_pages(doc, first=None, middle=None, last=None):
     first = first if first is not None else mg_opts.front_pages
     middle = middle if middle is not None else mg_opts.mid_pages
     last = last if last is not None else mg_opts.back_pages
-    log.info(f"{doc.filename} -> Extracting markdown for {first} first, {middle} middle, {last} last pages")
+    log.info(f"Extracting markdown for {first} first, {middle} middle, {last} last pages")
 
     first_pages = list(range(first)) if first else []
     center = doc.page_count // 2
@@ -60,7 +60,7 @@ def pdf_extract_pages(doc, first=None, middle=None, last=None):
         show_progress=False,
     )
 
-    log.info(f"{doc.filename} -> Extraced {len(text_md)} characters")
+    log.info(f"Extraced {len(text_md)} characters")
     return text_md
 
 
@@ -73,7 +73,7 @@ def pdf_extract_cover(doc):
     :return: An in-memory image object (BytesIO) or None if extraction fails
     """
     doc = pdf_open(doc)
-    log.info(f"{doc.filename} -> Extracting cover image")
+    log.info(f"Extracting cover image")
     try:
         first_page = doc[0]
         pix = first_page.get_pixmap(matrix=pymupdf.Matrix(2, 2))  # Scale up for better quality

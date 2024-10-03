@@ -1,10 +1,10 @@
+from loguru import logger as log
 from pathlib import Path
 from litellm.types.utils import ModelResponse
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.client import client
 from iscc_metagen.settings import mg_opts
 from iscc_metagen.pdf import pdf_extract_pages
-from loguru import logger
 
 
 def generate(file, model=None, max_retries=None):
@@ -17,11 +17,8 @@ def generate(file, model=None, max_retries=None):
     :param max_retries: Maximum number of retries for API calls.
     :return: Generated book metadata.
     """
-    logger.info(f"Starting metadata generation for {file}")
     text = pdf_extract_pages(file)
-    logger.info("Text extraction completed, generating metadata")
     metadata = generate_metadata(text, model, max_retries)
-    logger.info("Metadata generation completed")
     return metadata
 
 
@@ -37,6 +34,7 @@ def generate_metadata(text, model=None, max_retries=None):
     """
     model = model or mg_opts.litellm_model_name
     max_retries = max_retries or mg_opts.max_retries
+    log.info(f"Generating metadata from text with max {max_retries} retries")
     metadata, model_response = client.chat.completions.create_with_completion(
         model=model,
         max_retries=max_retries,
