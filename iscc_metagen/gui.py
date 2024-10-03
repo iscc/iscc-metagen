@@ -1,10 +1,20 @@
 import streamlit as st
 from pathlib import Path
 import tempfile
+from loguru import logger
 from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
 from iscc_metagen.settings import mg_opts
+
+# Global variable to store the Streamlit placeholder
+streamlit_log_placeholder = None
+
+
+def streamlit_sink(message):
+    global streamlit_log_placeholder
+    if streamlit_log_placeholder is not None:
+        streamlit_log_placeholder.markdown(f"{message.record['message']}")
 
 
 def create_sidebar():
@@ -151,10 +161,11 @@ def display_metadata(metadata):
 
 def main():
     # type: () -> None
+    global streamlit_log_placeholder
+
     st.set_page_config(page_title="MetaGen", layout="wide")
     set_page_container_style()
 
-    # Add the sidebar and get the selected model
     selected_model = create_sidebar()
 
     st.title("MetaGen - Metadata Generator")
@@ -167,12 +178,10 @@ def main():
             tmp_file.write(uploaded_file.getvalue())
             tmp_file_path = Path(tmp_file.name)
 
-        # Create two columns for cover and metadata
         with st.container():
             col1, col2 = st.columns([1, 2])
 
             with col1:
-                # Extract and display cover image
                 with st.spinner("Extracting cover image..."):
                     cover_image = pdf_extract_cover(tmp_file_path)
                     if cover_image:
@@ -181,16 +190,24 @@ def main():
                         st.warning("Failed to extract cover image.")
 
             with col2:
-                # Generate metadata
-                with st.spinner("Generating metadata..."):
+                streamlit_log_placeholder = st.empty()
+
+                # Add the Streamlit sink to loguru
+                sink_id = logger.add(streamlit_sink, format="{message}")
+
+                with st.status("Generating metadata...", expanded=True) as status:
                     try:
-                        # Pass the selected model to the generate function
                         metadata = generate(tmp_file_path, model=selected_model)
+                        status.update(label="Metadata generated successfully!", state="complete")
                         display_metadata(metadata)
                     except Exception as e:
+                        status.update(label="An error occurred", state="error")
                         st.error(f"An error occurred: {str(e)}")
                     finally:
-                        tmp_file_path.unlink()  # Delete the temporary file
+                        tmp_file_path.unlink()
+
+                # Remove the Streamlit sink after generation is complete
+                logger.remove(sink_id)
 
 
 if __name__ == "__main__":
