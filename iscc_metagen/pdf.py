@@ -1,3 +1,5 @@
+from functools import cache
+
 import pymupdf
 import pymupdf4llm
 from loguru import logger as log
@@ -28,6 +30,7 @@ def pdf_open(doc):
     return doc
 
 
+@cache
 def pdf_extract_pages(doc, first=None, middle=None, last=None):
     # type: (str|Path|Document, int|None, int|None, int|None) -> str
     """

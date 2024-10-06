@@ -21,7 +21,7 @@ class MetaGenSettings(BaseSettings):
         8, description="Number of pages to extract from the front of the document"
     )
     mid_pages: int = Field(
-        0, description="Number of pages to extract from the middle of the document"
+        3, description="Number of pages to extract from the middle of the document"
     )
     back_pages: int = Field(
         3, description="Number of pages to extract from the back of the document"

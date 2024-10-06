@@ -9,20 +9,19 @@ readme = "README.md"
 python = "^3.11"
 instructor = "*"
 litellm = "^1.46"
-python-dotenv = "^1.0.1"
+python-dotenv = "^1.0"
 pymupdf4llm = "^0.0.16"
-loguru = "^0.7.2"
-openai = "^1.46.0"
-pydantic-extra-types = "^2.9.0"
-pycountry = "^24.6.1"
-ollama = "^0.3.3"
-pydantic-settings = "^2.5.2"
-cyclopts = "^2.9.9"
-streamlit = { version = "^1.39.0", optional = true }
-Pillow = "^10.4.0"
-qdrant-client = {extras = ["fastembed"], version = "^1.11.3"}
-httpx-cache = "^0.13.0"
-jinja2 = "^3.1.4"
+loguru = "^0.7"
+openai = "^1.46"
+pydantic-extra-types = "^2.9"
+pycountry = "^24.6"
+ollama = "^0.3"
+pydantic-settings = "^2.5"
+cyclopts = "^2.9"
+streamlit = { version = "^1.39", optional = true }
+Pillow = "^10.4"
+httpx-cache = "^0.13"
+jinja2 = "^3.1"
 
 [tool.poetry.extras]
 gui = ["streamlit"]

@@ -22,7 +22,7 @@
     ...
 ]
 
-## Strategies
+## Strategy>
 
 ### Top-Down LLM based Iterative Selection
 
@@ -32,16 +32,6 @@ Steps:
     - Select the best categories from the subcategories of the previously selected categories
     - Repeat until LLM does not recommend more specific categories
     - Return only the most specific categories from each branch
-
-
-### RAG Based Selection
-
-Steps:
-  - Given a text extract from the book:
-    - Generate multiple search queries
-    - Query categories from RAG index using questions
-    - From each branch select the deepest category
-    - Ask LLM the rerank and select top 4 categories
 """
 
 from loguru import logger as log
@@ -153,7 +143,7 @@ def predict_categories_recursive(doc, thema):
     :return: ThemaCategories object containing the predicted categories
     """
     # Extract pages from the document
-    pages = pdf_extract_pages(doc, first=8, middle=3, last=3)
+    pages = pdf_extract_pages(doc, first=mg_opts.front_pages, middle=mg_opts.mid_pages, last=mg_opts.end_pages)
 
     def select_categories(categories):
         # type: (list[ThemaCode]) -> list[ThemaSelection]
@@ -174,6 +164,7 @@ def predict_categories_recursive(doc, thema):
                 {"role": "user", "content": prompt},
             ],
             response_model=ThemaCategories,
+            max_retries=3,
         )
         for cat in response.categories:
             log.debug(
