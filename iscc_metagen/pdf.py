@@ -47,13 +47,20 @@ def pdf_extract_pages(doc, first=None, middle=None, last=None):
     first = first if first is not None else mg_opts.front_pages
     middle = middle if middle is not None else mg_opts.mid_pages
     last = last if last is not None else mg_opts.back_pages
-    log.info(f"Extracting markdown for {first} first, {middle} middle, {last} last pages")
 
-    first_pages = list(range(first)) if first else []
-    center = doc.page_count // 2
-    middle_pages = list(range(center, center + middle)) if middle else []
-    last_pages = list(range(doc.page_count - last, doc.page_count)) if last else []
-    page_numbers = first_pages + middle_pages + last_pages
+    total_pages = doc.page_count
+    requested_pages = first + middle + last
+
+    if total_pages <= requested_pages:
+        log.info(f"Extracting all {total_pages} pages as the document is shorter than requested")
+        page_numbers = list(range(total_pages))
+    else:
+        log.info(f"Extracting markdown for {first} first, {middle} middle, {last} last pages")
+        first_pages = list(range(first)) if first else []
+        center = total_pages // 2
+        middle_pages = list(range(center, center + middle)) if middle else []
+        last_pages = list(range(total_pages - last, total_pages)) if last else []
+        page_numbers = first_pages + middle_pages + last_pages
 
     text_md = pymupdf4llm.to_markdown(
         doc,
