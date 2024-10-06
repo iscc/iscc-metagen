@@ -26,7 +26,9 @@ class BookMetadata(BaseModel):
         ..., description="Keywords that apply to the books topic", min_length=3, max_length=7
     )
     publisher: Optional[str] = Field(..., description="The name of publisher of the book")
-    publisher_website: Optional[HttpUrl] = Field(..., description="Website URL of the publisher")
+    publisher_website: Optional[HttpUrl] = Field(
+        ..., description="Website URL of the publisher (including http/https prefix)"
+    )
     year_published: Optional[conint(ge=1, le=9999)] = Field(
         ..., description="The year of publication"
     )
