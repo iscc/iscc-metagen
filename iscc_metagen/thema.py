@@ -34,6 +34,10 @@ Steps:
     - Return only the most specific categories from each branch
 """
 
+from pathlib import Path
+
+from pydantic.json_schema import SkipJsonSchema
+from pymupdf import Document
 from loguru import logger as log
 from functools import cached_property
 from typing import Annotated, List, Literal
@@ -117,6 +121,35 @@ class ThemaCategories(BaseModel):
     """A list of Thema categories relevant to the document"""
 
     categories: List[ThemaSelection] = Field(..., min_items=0, max_items=3)
+    response_cost: SkipJsonSchema[float] = Field(0.0, description="Response cost in USD")
+
+
+class Thema:
+    def __init__(self):
+        self.data = load_thema_json()
+        self.codes = parse_thema_codes(self.data)
+        self.db = {code.category_code: code for code in self.codes}
+
+    def get(self, category_code: str) -> ThemaCode:
+        return self.db.get(category_code)
+
+    @cached_property
+    def main_subjects(self) -> list[ThemaCode]:
+        """Returns a list of main subject headings"""
+        return [
+            code
+            for code in self.codes
+            if len(code.category_code) == 1 and code.category_code.isalpha()
+        ]
+
+    def sub_categories(self, parent: ThemaCode) -> list[ThemaCode]:
+        """Returns a list of sub categories headings for a given category"""
+        parent_code = parent.category_code
+        return [
+            code
+            for code in self.codes
+            if code.parent_code == parent_code and code.category_code != parent_code
+        ]
 
 
 def predict_categories(doc):
@@ -143,7 +176,9 @@ def predict_categories_recursive(doc, thema):
     :return: ThemaCategories object containing the predicted categories
     """
     # Extract pages from the document
-    pages = pdf_extract_pages(doc, first=mg_opts.front_pages, middle=mg_opts.mid_pages, last=mg_opts.end_pages)
+    pages = pdf_extract_pages(
+        doc, first=mg_opts.front_pages, middle=mg_opts.mid_pages, last=mg_opts.back_pages
+    )
 
     def select_categories(categories):
         # type: (list[ThemaCode]) -> list[ThemaSelection]
@@ -164,11 +199,11 @@ def predict_categories_recursive(doc, thema):
                 {"role": "user", "content": prompt},
             ],
             response_model=ThemaCategories,
-            max_retries=3,
+            max_retries=mg_opts.max_retries,
         )
         for cat in response.categories:
             log.debug(
-                f"Candidate -> {cat.category_code} - {thema.get(cat.category_code).full_heading}"
+                f"Candidate -> {cat.category_code} - {thema.get(cat.category_code).category_heading}"
             )
         return response.categories
 
@@ -219,43 +254,15 @@ def prompt_select_category(pages, categories) -> str:
 
     Based on your analysis, select 0 to 3 relevant Thema categories from the provided list.
     Remember:
-    - Choose categories that best represent the document's content.
+    - Choose categories that represent the document's content.
     - Ensure the first category you list is the most relevant and important.
-    - Only select categories if they are truly applicable to the document.
+    - IMPORTANT: Only select categories if they are truly applicable to the document.
     - It's acceptable to choose fewer than 3 categories if that better represents the document.
     - Return an empty list of categories if none of the categories is a good match.
 
     Remember to base your selection and explanation solely on the provided excerpts and Thema
     categories.
     """
-
-
-class Thema:
-    def __init__(self):
-        self.data = load_thema_json()
-        self.codes = parse_thema_codes(self.data)
-        self.db = {code.category_code: code for code in self.codes}
-
-    def get(self, category_code: str) -> ThemaCode:
-        return self.db.get(category_code)
-
-    @cached_property
-    def main_subjects(self) -> list[ThemaCode]:
-        """Returns a list of main subject headings"""
-        return [
-            code
-            for code in self.codes
-            if len(code.category_code) == 1 and code.category_code.isalpha()
-        ]
-
-    def sub_categories(self, parent: ThemaCode) -> list[ThemaCode]:
-        """Returns a list of sub categories headings for a given category"""
-        parent_code = parent.category_code
-        return [
-            code
-            for code in self.codes
-            if code.parent_code == parent_code and code.category_code != parent_code
-        ]
 
 
 def load_thema_json():
@@ -301,28 +308,6 @@ def parse_thema_codes(data):
             code.full_heading = " / ".join(full_heading)
 
         return thema_codes
-
-
-def build_thema_docs(codes):
-    # type: (list[ThemaCode]) -> list[str]
-    """Return list of documents composed of full headings and notes"""
-    code_dict = {code.category_code: code for code in codes}
-    docs = []
-
-    def get_full_heading(code):
-        # type: (ThemaCode) -> str
-        """Recursively build the full heading for a code"""
-        if code.CodeParent and code.CodeParent in code_dict:
-            parent_heading = get_full_heading(code_dict[code.CodeParent])
-            return f"{parent_heading} / {code.CodeDescription}"
-        return code.CodeDescription
-
-    for code in codes:
-        doc = get_full_heading(code)
-        if code.CodeNotes:
-            doc += f"\n{code.CodeNotes}"
-        docs.append(doc)
-    return docs
 
 
 if __name__ == "__main__":

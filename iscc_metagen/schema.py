@@ -37,7 +37,7 @@ class BookMetadata(BaseModel):
     isbns: Optional[list[BookISBN]]
 
     model: SkipJsonSchema[str] = Field("", description="Model used for generation")
-    response_cost: SkipJsonSchema[float] = Field(0.0, description="Response cost in USC")
+    response_cost: SkipJsonSchema[float] = Field(0.0, description="Response cost in USD")
 
     # @field_validator("title")
     # def title_is_uppercase(cls, v: str):
