@@ -250,7 +250,7 @@ def main():
                 display_metadata(metadata)
 
             # Start Thema category prediction
-            status.update(label="Predicting Thema categories...", state="running", expanded=True)
+            status.update(label="Predicting Thema categories...", state="running", expanded=False)
 
             thema_categories = predict_categories(tmp_file_path)
 
