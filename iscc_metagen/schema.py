@@ -19,6 +19,8 @@ class BookISBN(BaseModel):
 
 
 class BookMetadata(BaseModel):
+    """Metadata about a Book. Provide metadata in the same language as the book is written in!"""
+
     title: str = Field(..., description="The title of the book")
     subtitle: Optional[str] = Field(None, description="The subtitle of the book")
     description: str = Field(..., description="A short and concise description of the book")
