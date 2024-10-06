@@ -258,24 +258,6 @@ class Thema:
         ]
 
 
-def ingest_thema():
-    """Ingest Thema Categories into Vector DB"""
-
-    data = load_thema_json()
-    codes = parse_thema_codes(data)
-    docs = build_thema_docs(codes)
-    metadata = [code.model_dump() for code in codes]
-    # ids = [uuid.uuid5(NAMESPACE, code.CodeValue) for code in codes]
-    with timer("Ingested thema categories:"):
-        ids = vdb.add(
-            collection_name="thema",
-            documents=docs,
-            metadata=metadata,
-            batch_size=64,
-        )
-    return ids
-
-
 def load_thema_json():
     # type: () -> dict
     """Load original Thema JSON"""
