@@ -173,21 +173,24 @@ def predict_categories_recursive(doc, thema):
 
     :param doc: The document to analyze (file path or Document object)
     :param thema: Thema object containing category data
-    :return: ThemaCategories object containing the predicted categories
+    :return: ThemaCategories object containing the predicted categories and total response cost
     """
     # Extract pages from the document
     pages = pdf_extract_pages(
         doc, first=mg_opts.front_pages, middle=mg_opts.mid_pages, last=mg_opts.back_pages
     )
 
+    total_cost = 0.0
+
     def select_categories(categories):
         # type: (list[ThemaCode]) -> list[ThemaSelection]
+        nonlocal total_cost
         category_list = "\n".join(
             [f"{code.category_code}: {code.category_heading}" for code in categories]
         )
         prompt = prompt_select_category(pages=pages, categories=category_list)
 
-        response = client.chat.completions.create(
+        response, model_response = client.chat.completions.create_with_completion(
             model=mg_opts.litellm_model_name,
             messages=[
                 {
@@ -201,9 +204,12 @@ def predict_categories_recursive(doc, thema):
             response_model=ThemaCategories,
             max_retries=mg_opts.max_retries,
         )
+        response_cost = model_response._hidden_params.get("response_cost", 0.0)
+        total_cost += response_cost
         for cat in response.categories:
             log.debug(
-                f"Candidate -> {cat.category_code} - {thema.get(cat.category_code).category_heading}"
+                f"Candidate -> {cat.category_code} -"
+                f" {thema.get(cat.category_code).category_heading}"
             )
         return response.categories
 
@@ -230,7 +236,9 @@ def predict_categories_recursive(doc, thema):
         branch = [category] + select_subcategories(category)
         final_categories.append(branch[-1])  # Add only the deepest category from each branch
 
-    return ThemaCategories(categories=final_categories[:4])  # Limit to top 4 categories
+    return ThemaCategories(
+        categories=final_categories[:4], response_cost=total_cost
+    )  # Limit to top 4 categories
 
 
 @make_prompt
