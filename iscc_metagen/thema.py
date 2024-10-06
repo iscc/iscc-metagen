@@ -121,7 +121,7 @@ class ThemaSelection(BaseModel):
 class ThemaCategories(BaseModel):
     """A list of Thema categories relevant to the document"""
 
-    categories: List[ThemaSelection] = Field(..., min_items=0, max_items=4)
+    categories: List[ThemaSelection] = Field(..., min_items=0, max_items=3)
 
 
 def predict_categories_recursive(doc):
@@ -171,7 +171,7 @@ def predict_categories(doc):
 def prompt_select_category(pages, categories) -> str:
     """
     You are tasked with selecting the most relevant Thema categories for a document based on
-    excerpts from its beginning, middle, and end. Your goal is to choose 1 to 4 categories that
+    excerpts from its beginning, middle, and end. Your goal is to choose 0 to 3 categories that
     best represent the document's content, ensuring the first category is the most relevant.
 
     Here is the list of Thema categories to choose from:
@@ -186,12 +186,12 @@ def prompt_select_category(pages, categories) -> str:
     2. Are there any recurring themes or ideas?
     3. What is the overall tone or approach of the document?
 
-    Based on your analysis, select 1 to 4 relevant Thema categories from the provided list.
+    Based on your analysis, select 0 to 3 relevant Thema categories from the provided list.
     Remember:
     - Choose categories that best represent the document's content.
     - Ensure the first category you list is the most relevant and important.
     - Only select categories if they are truly applicable to the document.
-    - It's acceptable to choose fewer than 4 categories if that better represents the document.
+    - It's acceptable to choose fewer than 3 categories if that better represents the document.
     - Return an empty list of categories if none of the categories is a good match.
 
     Remember to base your selection and explanation solely on the provided excerpts and Thema
