@@ -6,6 +6,7 @@ from iscc_metagen.main import generate
 from iscc_metagen.schema import BookMetadata
 from iscc_metagen.pdf import pdf_extract_cover
 from iscc_metagen.settings import mg_opts
+from iscc_metagen.thema import predict_categories
 
 # Global variable to store the Streamlit placeholder
 streamlit_log_placeholder = None
@@ -161,6 +162,38 @@ def display_metadata(metadata):
         st.code(json_output, language="json")
 
 
+def display_thema_categories(thema_categories):
+    # type: (ThemaCategories) -> None
+    """Display Thema categories in a visually appealing manner."""
+    st.markdown(
+        f"""
+        <div style="background-color: #4b4bff;padding:10px;border-radius:5px;text-align:center;">
+            <h3 style="margin:0;color:white;">Thema Categories Cost: {format_response_cost(thema_categories.response_cost)}</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.subheader("Thema Categories", divider=True)
+
+    for category in thema_categories.categories:
+        st.markdown(
+            f"""
+            <div style="background-color: var(--secondary-background-color);padding:10px;border-radius:5px;margin-bottom:10px;">
+                <h4 style="margin:0;">{category.category_code}: {category.category_heading}</h4>
+                <p><strong>Confidence:</strong> {category.confidence}</p>
+                <p><strong>Reason:</strong> {category.reason}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Add collapsible JSON area
+    with st.expander("View Thema Categories JSON"):
+        json_output = thema_categories.model_dump_json(indent=2)
+        st.code(json_output, language="json")
+
+
 def main():
     # type: () -> None
     global streamlit_log_placeholder
@@ -210,11 +243,23 @@ def main():
 
             metadata = generate(tmp_file_path, model=selected_model)
 
-            status.update(label="Processing completed!", state="complete", expanded=False)
+            status.update(label="Metadata generation completed!", state="complete", expanded=False)
 
             # Display metadata
             with metadata_placeholder.container():
                 display_metadata(metadata)
+
+            # Start Thema category prediction
+            status.update(label="Predicting Thema categories...", state="running", expanded=True)
+
+            thema_categories = predict_categories(tmp_file_path)
+
+            status.update(
+                label="Thema category prediction completed!", state="complete", expanded=False
+            )
+
+            # Display Thema categories
+            display_thema_categories(thema_categories)
 
         except Exception as e:
             status.update(label="An error occurred", state="error")
