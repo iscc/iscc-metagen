@@ -160,10 +160,7 @@ def predict_categories(doc):
     :param doc: The document to analyze (file path or Document object)
     :return: ThemaCategories object containing the predicted categories
     """
-    # Initialize Thema
-    thema = Thema()
-
-    return predict_categories_recursive(doc, thema)
+    return predict_categories_recursive(doc, thema_db)
 
 
 def predict_categories_recursive(doc, thema):
@@ -316,6 +313,9 @@ def parse_thema_codes(data):
             code.full_heading = " / ".join(full_heading)
 
         return thema_codes
+
+
+thema_db = Thema()
 
 
 if __name__ == "__main__":
