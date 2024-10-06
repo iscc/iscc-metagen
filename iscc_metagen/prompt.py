@@ -5,7 +5,7 @@ import textwrap
 from jinja2 import Environment, StrictUndefined
 
 
-def make_prompt(fn):
+def make_prompt(fn) -> str:
     """Decorate a function that contains a prompt template.
 
     This allows you to define prompts in the docstring of a function and render them using Jinja2

@@ -41,16 +41,19 @@ Steps:
     - From each branch select the deepest category
     - Ask LLM the rerank and select top 4 categories
 """
-import io
 
 from loguru import logger as log
 from functools import cached_property
 from typing import Annotated, List, Literal
 import httpx_cache
 from pydantic import BaseModel, BeforeValidator, Field
+import pathlib
+import json
 from iscc_metagen.utils import timer
 from iscc_metagen.prompt import make_prompt
-import pathlib
+from iscc_metagen.client import client
+from iscc_metagen.pdf import pdf_extract_pages
+from iscc_metagen.settings import mg_opts
 
 HERE = pathlib.Path(__file__).parent.absolute()
 
@@ -62,9 +65,6 @@ NAMESPACE = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
 
 # Thema JSON has a mix of number and string values for some of the fields
 Str = Annotated[str, BeforeValidator(str)]
-
-
-import json
 
 
 class ThemaCode(BaseModel):
@@ -123,16 +123,15 @@ class ThemaCategories(BaseModel):
 
     categories: List[ThemaSelection]
 
-
-from iscc_metagen.client import client
-from iscc_metagen.pdf import pdf_extract_pages
-from iscc_metagen.settings import mg_opts
+def predict_categories_recursive(doc):
+    # type: (str|Path|Document) -> ThemaCategories
+    """Predict Thema Leaf Categories for docutment"""
 
 
 def predict_categories(doc):
     # type: (str|Path|Document) -> ThemaCategories
     """
-    Predict Thema Categories for a document.
+    Predict Thema Main Categories for a document.
 
     :param doc: The document to analyze (file path or Document object)
     :return: ThemaCategories object containing the predicted categories
@@ -168,7 +167,7 @@ def predict_categories(doc):
 
 
 @make_prompt
-def prompt_select_category(pages, categories):
+def prompt_select_category(pages, categories) -> str:
     """
     You are tasked with selecting the most relevant Thema categories for a document based on
     excerpts from its beginning, middle, and end. Your goal is to choose 1 to 4 categories that
@@ -257,9 +256,8 @@ def load_thema_json():
 
 def save_thema_json():
     data = load_thema_json()
-    with open(THEMA_PATH, 'w', newline='\n', encoding="utf-8") as file:
-        json.dump(data, file, separators=(',', ':'), ensure_ascii=False)
-
+    with open(THEMA_PATH, "w", newline="\n", encoding="utf-8") as file:
+        json.dump(data, file, separators=(",", ":"), ensure_ascii=False)
 
 
 def parse_thema_codes(data):
@@ -294,5 +292,6 @@ def build_thema_docs(codes):
 
 if __name__ == "__main__":
     from rich import print as p
+
     pdf = HERE.parent / ".data/test1.pdf"
     p(predict_categories(pdf))
