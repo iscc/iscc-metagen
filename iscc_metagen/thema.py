@@ -28,9 +28,11 @@
 
 Steps:
   - Given a text extract from the book:
-    - Select 1 main and up to 3 secondary categories from top level categories
-    - Do the same for SubCategories of the selected categories traversing down the tree
-    - Select the main and up to 3 secondary headings from the list of collected leafs
+    - Select the best top level categories
+    - Select the best categories from the subcategories of the previously selected categories
+    - Repeat until LLM does not recommend more specific categories
+    - Return only the most specific categories from each branch
+
 
 ### RAG Based Selection
 
@@ -122,11 +124,6 @@ class ThemaCategories(BaseModel):
     """A list of Thema categories relevant to the document"""
 
     categories: List[ThemaSelection] = Field(..., min_items=0, max_items=3)
-
-
-def predict_categories_recursive(doc):
-    # type: (str|Path|Document) -> ThemaCategories
-    """Predict Thema Leaf Categories for docutment"""
 
 
 def predict_categories(doc):
