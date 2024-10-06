@@ -10,6 +10,9 @@ class MetaGenSettings(BaseSettings):
     litellm_models: list[str] = Field(
         [litellm_model_name], description="List of available litellm models"
     )
+    fastembed_model_name: str = Field(
+        "nomic-ai/nomic-embed-text-v1.5-Q", description="Embeddding model name"
+    )
     instructor_mode: Mode = Field(Mode.TOOLS, description="Instructor tool calling mode")
     max_retries: int = Field(3, description="Max retries to generate a valid response")
     ollama_num_ctx: int = Field(8192, description="Default context size for loading Ollama models")
