@@ -94,6 +94,9 @@ class ThemaCode(BaseModel):
     modified: Str = Field(
         alias="Modified", default="", description="The modification version of this Thema code"
     )
+    full_heading: str = Field(
+        default="", description="The full forward slash separated path of the parent headings"
+    )
 
     class Config:
         populate_by_name = True
@@ -164,14 +167,18 @@ def predict_categories_recursive(doc, thema):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant that selects Thema categories for books.",
+                    "content": (
+                        "You are a helpful assistant that selects Thema categories for books."
+                    ),
                 },
                 {"role": "user", "content": prompt},
             ],
             response_model=ThemaCategories,
         )
         for cat in response.categories:
-            log.debug(f"Candidate -> {cat.category_code} - {cat.category_heading}")
+            log.debug(
+                f"Candidate -> {cat.category_code} - {thema.get(cat.category_code).full_heading}"
+            )
         return response.categories
 
     def select_subcategories(parent_category):
@@ -238,6 +245,9 @@ class Thema:
         self.codes = parse_thema_codes(self.data)
         self.db = {code.category_code: code for code in self.codes}
 
+    def get(self, category_code: str) -> ThemaCode:
+        return self.db.get(category_code)
+
     @cached_property
     def main_subjects(self) -> list[ThemaCode]:
         """Returns a list of main subject headings"""
@@ -300,7 +310,24 @@ def parse_thema_codes(data):
     """Parse Thema codes from raw JSON data"""
     with timer("Parsing Thema Codes"):
         codes = data["CodeList"]["ThemaCodes"]["Code"]
-        return [ThemaCode.model_validate(code) for code in codes]
+        thema_codes = [ThemaCode.model_validate(code) for code in codes]
+
+        # Create a dictionary for quick lookup
+        code_dict = {code.category_code: code for code in thema_codes}
+
+        # Populate full_heading field
+        for code in thema_codes:
+            full_heading = []
+            current_code = code
+            while current_code:
+                full_heading.insert(0, current_code.category_heading)
+                if current_code.parent_code:
+                    current_code = code_dict.get(current_code.parent_code)
+                else:
+                    break
+            code.full_heading = " / ".join(full_heading)
+
+        return thema_codes
 
 
 def build_thema_docs(codes):
