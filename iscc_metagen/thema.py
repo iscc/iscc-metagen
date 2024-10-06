@@ -134,34 +134,70 @@ def predict_categories(doc):
     :param doc: The document to analyze (file path or Document object)
     :return: ThemaCategories object containing the predicted categories
     """
-    # Extract pages from the document
-    pages = pdf_extract_pages(doc, first=8, middle=3, last=3)
-
     # Initialize Thema
     thema = Thema()
 
-    # Get main subject categories as a formatted string
-    categories = "\n".join(
-        [f"{code.category_code}: {code.category_heading}" for code in thema.main_subjects]
-    )
+    return predict_categories_recursive(doc, thema)
 
-    # Generate the prompt
-    prompt = prompt_select_category(pages=pages, categories=categories)
 
-    # Use the AI model to predict categories
-    response = client.chat.completions.create(
-        model=mg_opts.litellm_model_name,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful assistant that selects Thema categories for books.",
-            },
-            {"role": "user", "content": prompt},
-        ],
-        response_model=ThemaCategories,
-    )
+def predict_categories_recursive(doc, thema):
+    # type: (str|Path|Document, Thema) -> ThemaCategories
+    """
+    Predict Thema categories for a document using the Top-Down LLM based Iterative Selection strategy.
 
-    return response
+    :param doc: The document to analyze (file path or Document object)
+    :param thema: Thema object containing category data
+    :return: ThemaCategories object containing the predicted categories
+    """
+    # Extract pages from the document
+    pages = pdf_extract_pages(doc, first=8, middle=3, last=3)
+
+    def select_categories(categories):
+        # type: (list[ThemaCode]) -> list[ThemaSelection]
+        category_list = "\n".join(
+            [f"{code.category_code}: {code.category_heading}" for code in categories]
+        )
+        prompt = prompt_select_category(pages=pages, categories=category_list)
+
+        response = client.chat.completions.create(
+            model=mg_opts.litellm_model_name,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that selects Thema categories for books.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            response_model=ThemaCategories,
+        )
+        for cat in response.categories:
+            log.debug(f"Candidate -> {cat.category_code} - {cat.category_heading}")
+        return response.categories
+
+    def select_subcategories(parent_category):
+        # type: (ThemaSelection) -> list[ThemaSelection]
+        subcategories = thema.sub_categories(thema.db[parent_category.category_code])
+        if not subcategories:
+            return []
+
+        log.debug(f"Selecting subcategories for {parent_category.category_code}")
+        selected = select_categories(subcategories)
+
+        if not selected:
+            return []
+
+        result = [selected[0]]  # Keep only the most relevant subcategory
+        deeper_subcategories = select_subcategories(selected[0])
+        return result + deeper_subcategories
+
+    top_level_categories = select_categories(thema.main_subjects)
+    final_categories = []
+
+    for category in top_level_categories:
+        branch = [category] + select_subcategories(category)
+        final_categories.append(branch[-1])  # Add only the deepest category from each branch
+
+    return ThemaCategories(categories=final_categories[:4])  # Limit to top 4 categories
 
 
 @make_prompt
@@ -292,5 +328,6 @@ def build_thema_docs(codes):
 if __name__ == "__main__":
     from rich import print as p
 
-    pdf = HERE.parent / ".data/test1.pdf"
-    p(predict_categories(pdf))
+    pdf = HERE.parent / ".data/bergische.pdf"
+    thema = Thema()
+    p(predict_categories_recursive(pdf, thema))
