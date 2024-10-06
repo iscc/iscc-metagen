@@ -119,9 +119,10 @@ class ThemaSelection(BaseModel):
 
 
 class ThemaCategories(BaseModel):
-    """A list of Thema categories relevant to the docunent"""
+    """A list of Thema categories relevant to the document"""
 
-    categories: List[ThemaSelection]
+    categories: List[ThemaSelection] = Field(..., min_items=0, max_items=4)
+
 
 def predict_categories_recursive(doc):
     # type: (str|Path|Document) -> ThemaCategories
@@ -191,6 +192,7 @@ def prompt_select_category(pages, categories) -> str:
     - Ensure the first category you list is the most relevant and important.
     - Only select categories if they are truly applicable to the document.
     - It's acceptable to choose fewer than 4 categories if that better represents the document.
+    - Return an empty list of categories if none of the categories is a good match.
 
     Remember to base your selection and explanation solely on the provided excerpts and Thema
     categories.
